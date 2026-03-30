@@ -203,7 +203,7 @@ using thread_id from Streamlit session_state.
 
 - **Framework:** Streamlit
 - **Deployment platform:** Streamlit Community Cloud
-- **Public URL:** Pending deployment
+- **Public URL:** https://deep-learning-rag-agent-dtsc5082.streamlit.app/
 
 - **Ingestion panel features:**
   Multi-file uploader for `.md` and `.pdf`, ingestion status, duplicate counts, error display, document list, and per-document delete action.

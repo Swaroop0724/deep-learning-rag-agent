@@ -12,6 +12,7 @@ PEP 8 | OOP | Single Responsibility
 
 from __future__ import annotations
 
+import os
 from enum import Enum
 from functools import lru_cache
 
@@ -110,7 +111,54 @@ def get_settings() -> Settings:
     Uses lru_cache so the .env file is only parsed once per process.
     Call get_settings() anywhere in the codebase to access configuration.
     """
+    _hydrate_env_from_streamlit_secrets()
     return Settings()
+
+
+def _hydrate_env_from_streamlit_secrets() -> None:
+    """
+    Copy root-level Streamlit secrets into os.environ when available.
+
+    Streamlit Community Cloud exposes secrets through st.secrets and, in
+    many cases, also as environment variables. This fallback makes the
+    app more robust when environment propagation differs across runtimes.
+    """
+    try:
+        import streamlit as st
+    except Exception:
+        return
+
+    try:
+        secrets = st.secrets
+        _ = len(secrets)
+    except Exception:
+        return
+
+    secret_keys = [
+        "LLM_PROVIDER",
+        "GROQ_API_KEY",
+        "GROQ_MODEL",
+        "OLLAMA_BASE_URL",
+        "OLLAMA_MODEL",
+        "LMSTUDIO_BASE_URL",
+        "LMSTUDIO_MODEL",
+        "EMBEDDING_PROVIDER",
+        "EMBEDDING_MODEL",
+        "CHROMA_DB_PATH",
+        "CHROMA_COLLECTION_NAME",
+        "RETRIEVAL_K",
+        "SIMILARITY_THRESHOLD",
+        "MAX_CONTEXT_TOKENS",
+        "LOG_LEVEL",
+        "APP_TITLE",
+        "CORPUS_DIR",
+    ]
+
+    for key in secret_keys:
+        value = secrets.get(key)
+        if value is None:
+            continue
+        os.environ.setdefault(key, str(value))
 
 
 # ---------------------------------------------------------------------------
