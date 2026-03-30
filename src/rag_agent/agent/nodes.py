@@ -420,15 +420,18 @@ def generation_node(state: AgentState) -> dict:
 
 def should_retry_retrieval(state: AgentState) -> str:
     """
-    Conditional edge function: decide whether to retry retrieval or generate.
+    Conditional edge function used by the current graph assembly.
 
-    Called by the graph after retrieval_node. If no context was found,
-    the graph routes back to query_rewrite_node for one retry with a
-    broader query before triggering the hallucination guard.
+    In the current implementation this function always returns
+    `"generate"`, so the graph always proceeds to generation_node.
+    The hallucination guard is then enforced inside generation_node
+    based on the `no_context_found` flag.
 
     Interview talking point: conditional edges in LangGraph enable
     agentic behaviour — the graph makes decisions about its own
-    execution path rather than following a fixed sequence.
+    execution path rather than following a fixed sequence. This project
+    keeps the branching minimal and concentrates the no-context logic
+    inside generation_node.
 
     Parameters
     ----------
@@ -439,11 +442,10 @@ def should_retry_retrieval(state: AgentState) -> str:
     -------
     str
         "generate" — proceed to generation_node.
-        "end"      — skip generation, return no_context response directly.
 
     Notes
     -----
-    Retry logic should be limited to one attempt to prevent infinite loops.
-    Track retry count in AgentState if implementing retry behaviour.
+    Retry logic is not currently implemented. If added later, track a
+    retry counter in AgentState to prevent infinite loops.
     """
     return "generate"

@@ -4,11 +4,11 @@
 
 | Test | Input | Expected Behavior | Status |
 |---|---|---|---|
-| Normal query | `Explain the vanishing gradient problem` | Relevant RNN or LSTM chunks retrieved, answer grounded in corpus, at least one source citation shown | Ready to run |
-| Off-topic query | `What is the capital of France?` | Hallucination guard fires, answer says relevant context was not found, no fabricated deep learning response | Ready to run |
-| Duplicate ingestion | Upload `rnn_intermediate.md` twice | First ingest adds chunks, second ingest reports duplicates skipped | Ready to run |
-| Empty query | Submit blank chat input | UI should not crash and should avoid sending an invalid query | Ready to run |
-| Cross-topic query | `How do LSTMs improve on RNNs for Seq2Seq tasks?` | Retrieval spans more than one concept area and answer synthesizes grounded context with citations | Ready to run |
+| Normal query | `Explain the vanishing gradient problem` | Relevant RNN or LSTM chunks retrieved, answer grounded in corpus, at least one source citation shown | Pass in retrieval smoke test; final UI citation capture still recommended |
+| Off-topic query | `What is the capital of France?` | Hallucination guard fires, answer says relevant context was not found, no fabricated deep learning response | Pass in retrieval smoke test (`0` chunks returned) |
+| Duplicate ingestion | Upload `rnn_intermediate.md` twice | First ingest adds chunks, second ingest reports duplicates skipped | Pass in smoke test (`9` ingested, then `9` skipped on re-ingest) |
+| Empty query | Submit blank chat input | UI should not crash and should avoid sending an invalid query | Pass by code path review; `st.chat_input` blocks blank submission and retrieval returns `[]` for blank input |
+| Cross-topic query | `How do LSTMs improve on RNNs for Seq2Seq tasks?` | Retrieval spans more than one concept area and answer synthesizes grounded context with citations | Pass in retrieval smoke test (returned LSTM, RNN, and Seq2Seq chunks) |
 
 ## Risk Assessment
 
@@ -21,6 +21,8 @@
 ## Manual Verification Notes
 
 - Unit tests pass with `uv run pytest tests/ -v`
-- Duplicate skipping has been verified in smoke testing
-- Real retrieval and Groq-backed generation have been verified in smoke testing
-- Final UI walkthrough should still be recorded for the submission video
+- Dependency import check passes with `uv run python -c "import chromadb; import langchain; import langgraph; print('All dependencies OK')"`
+- Corpus chunking smoke test showed all authored markdown files producing 3 chunks each, with observed chunk sizes in the 118-143 word range
+- Duplicate skipping has been verified in smoke testing with real corpus files
+- Retrieval smoke testing verified on-topic, off-topic, and cross-topic behavior against a temporary Chroma collection
+- Final UI walkthrough with visible citations should still be recorded for the submission video

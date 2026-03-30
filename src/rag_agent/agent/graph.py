@@ -39,17 +39,13 @@ class AgentGraphBuilder:
            ▼
     retrieval_node       ← fetches relevant chunks from ChromaDB
            │
-           ▼ (conditional edge via should_retry_retrieval)
+           ▼ (conditional edge currently resolves to "generate")
            │
-     ┌─────┴──────┐
-     │            │
-  "generate"    "end"
-     │            │
-     ▼            ▼
-generation_node  [END]   ← hallucination guard fires here
-     │
-     ▼
-   [END]
+           ▼
+    generation_node      ← hallucination guard fires here when
+           │               retrieval returned no relevant chunks
+           ▼
+         [END]
 
     The checkpointer (MemorySaver) enables multi-turn conversation:
     each thread_id maintains its own message history and state,

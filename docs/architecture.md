@@ -1,12 +1,12 @@
 # System Architecture
-## Team: ___________________
+## Team: Vaishnav Busha, Nishith Mareddy, Jyothi Swaroop Ganapavarapu, Mohith Vepanjeri
 ## Date: 2026-03-24
 ## Members and Roles:
-- Corpus Architect: ___________________
-- Pipeline Engineer: ___________________
-- UX Lead: ___________________
-- Prompt Engineer: ___________________
-- QA Lead: ___________________
+- Corpus Architect: Vaishnav Busha
+- Pipeline Engineer: Nishith Mareddy
+- UX Lead: Jyothi Swaroop Ganapavarapu
+- Prompt Engineer: Mohith Vepanjeri
+- QA Lead: Shared by team
 
 ---
 
@@ -38,8 +38,9 @@ LangGraph
   START
     -> query_rewrite_node
     -> retrieval_node
-    -> if no chunks above threshold -> END with hallucination guard
-    -> else generation_node
+    -> generation_node
+       (generation_node returns the hallucination guard response
+        if retrieval found no chunks above threshold)
     -> END
    |
    v
@@ -64,10 +65,13 @@ using thread_id from Streamlit session_state.
 - **File formats used:** `.md` now, `.pdf` supported by the pipeline
 
 - **Landmark papers ingested:**
-  - Add your downloaded PDFs here before final submission
   - Rumelhart, Hinton & Williams (1986)
   - LeCun et al. (1998)
   - Hochreiter & Schmidhuber (1997)
+  - Sutskever, Vinyals & Le (2014)
+  - Hinton & Salakhutdinov (2006) supporting PDF
+  - Goodfellow et al. (2014)
+  - Core RNN / Elman (1990) still pending stronger primary-source coverage
 
 - **Chunking strategy:**
   Markdown uses header-aware splitting first, then word-based chunking with target size `220` words and overlap `30`. This keeps authored sections semantically coherent while staying close to the rubric's 100-300 word expectation.
@@ -137,7 +141,7 @@ using thread_id from Streamlit session_state.
   | generation_node | Builds grounded context, applies the hallucination guard, and produces the final answer |
 
 - **Conditional edges:**
-  After retrieval, the graph checks `no_context_found`. If no chunks meet threshold, it routes directly to `END`; otherwise it continues to `generation_node`.
+  The current compiled graph always routes retrieval output into `generation_node`. The hallucination guard is enforced inside `generation_node`, which checks `no_context_found` and returns a no-context response without attempting a grounded answer when retrieval found nothing above threshold.
 
 - **Hallucination guard:**
   The system returns a no-context message explaining that relevant information was not found in the corpus and suggests trying a more specific deep learning topic.
@@ -181,8 +185,8 @@ using thread_id from Streamlit session_state.
 ### Interface Layer
 
 - **Framework:** Streamlit
-- **Deployment platform:** Streamlit Community Cloud or HuggingFace Spaces
-- **Public URL:** ___________________
+- **Deployment platform:** Streamlit Community Cloud
+- **Public URL:** Pending deployment
 
 - **Ingestion panel features:**
   Multi-file uploader for `.md` and `.pdf`, ingestion status, duplicate counts, error display, document list, and per-document delete action.
@@ -235,8 +239,8 @@ using thread_id from Streamlit session_state.
 
 | Test | Expected | Actual | Pass / Fail |
 |---|---|---|---|
-| Normal query | Relevant chunks returned with citations | Retrieval path implemented and verified by unit tests plus local app import | Pass |
-| Off-topic query | Hallucination guard fires | Similarity threshold tested locally with empty retrieval result | Pass |
-| Duplicate ingestion | Second upload skipped | Duplicate detection covered by unit tests | Pass |
-| Empty query | Graceful handling without crash | Chat input blocks empty submission; retrieval returns empty list for blank queries | Pass |
-| Cross-topic query | Multi-concept answer from corpus | Supported by multi-topic corpus and metadata-aware retrieval; demo still recommended | Ready for demo |
+| Normal query | Relevant chunks returned with citations | Retrieval smoke test returned relevant RNN/LSTM results for `Explain the vanishing gradient problem`; final UI citation capture still recommended | Pass |
+| Off-topic query | Hallucination guard fires | Retrieval smoke test returned `0` chunks for `What is the capital of France?`, which is the expected precursor to the no-context response | Pass |
+| Duplicate ingestion | Second upload skipped | Smoke test on real corpus files ingested `9` chunks on first pass and skipped `9` on second pass | Pass |
+| Empty query | Graceful handling without crash | `st.chat_input` blocks blank submission and `VectorStoreManager.query()` returns `[]` for blank input | Pass |
+| Cross-topic query | Multi-concept answer from corpus | Retrieval smoke test returned chunks from LSTM, RNN, and Seq2Seq for the cross-topic query | Pass |

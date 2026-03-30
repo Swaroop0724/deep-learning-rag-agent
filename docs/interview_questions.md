@@ -14,6 +14,6 @@
 
 ## Question 3
 
-**Question:** Why did your team choose a chunk size of 512 with overlap 50, and what might break if you doubled it?
+**Question:** Why did your team choose a chunk size of 220 words with 30 words of overlap, and what might break if you doubled it?
 
-**Model Answer:** We chose 512 with overlap 50 to balance retrieval precision with enough local context for technical explanations. If we doubled the chunk size, retrieval could become less precise because multiple ideas might be mixed into one chunk, which can weaken source grounding and make generated answers less specific.
+**Model Answer:** We chose a target chunk size of about 220 words with 30 words of overlap so the chunks stay within the assignment's 100-300 word window while still preserving enough context for technical explanations. The overlap helps adjacent chunks retain continuity across section boundaries. If we doubled the chunk size, more concepts would be mixed into each chunk, which could reduce retrieval precision, weaken source grounding, and make answers less specific.
